@@ -16,10 +16,13 @@ class DF8RouteOS:
 
         @self.bot.message_handler(commands=['start'])
         def start_message(message):
-            keyboard = types.InlineKeyboardMarkup()
-            for rule in config.rules:
-                keyboard.add(types.InlineKeyboardButton(text=f'{rule}', callback_data=rule))
-            self.bot.send_message(message.chat.id, text="Rules:", reply_markup=keyboard)
+            if str(message.chat.id) != config.tlg_user_id:
+                self.bot.send_message(message.chat.id, 'Fuck YOU')
+            else:
+                keyboard = types.InlineKeyboardMarkup()
+                for rule in config.rules:
+                    keyboard.add(types.InlineKeyboardButton(text=f'{rule}', callback_data=rule))
+                self.bot.send_message(message.chat.id, text="Rules:", reply_markup=keyboard)
 
         @self.bot.callback_query_handler(func=lambda call: True)
         def callback_inline(call):
