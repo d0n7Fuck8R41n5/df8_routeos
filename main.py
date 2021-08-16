@@ -13,6 +13,7 @@ class DF8RouteOS:
         self.route_user = route_user
         self.route_password = route_password
         self.bot = TeleBot(config.tlg_token)
+        self.rules = self.get_rule() if config.get_rule_from_router else config.rules
 
         @self.bot.message_handler(commands=['start'])
         def start_message(message):
@@ -20,7 +21,7 @@ class DF8RouteOS:
                 self.bot.send_message(message.chat.id, 'Fuck YOU')
             else:
                 keyboard = types.InlineKeyboardMarkup()
-                for rule in config.rules:
+                for rule in self.rules:
                     keyboard.add(types.InlineKeyboardButton(text=f'{rule}', callback_data=rule))
                 self.bot.send_message(message.chat.id, text="Rules:", reply_markup=keyboard)
 
@@ -57,6 +58,17 @@ class DF8RouteOS:
         router_os.close()
         if nat_rule:
             return nat_rule[0]
+
+    @staticmethod
+    def get_rule():
+        rules = []
+        router_os = login(config.route_user, config.route_password, config.route_ip)
+        nat_rule = router_os.__call__('/ip/firewall/nat/print')
+        for rule in nat_rule:
+            rules.append(rule['comment'])
+        router_os.close()
+
+        return rules
 
 
 if __name__ == '__main__':
